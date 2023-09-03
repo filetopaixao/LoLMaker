@@ -5,7 +5,7 @@ import * as S from './styled'
 const Images = (props) => {
 
   return(
-    <S.Images src={props.src} onClick={(e) => props.onClick(e)} /> 
+    <S.Images {...props} src={props.src} onClick={(e) => props.onClick(e)} />
   )
 }
 

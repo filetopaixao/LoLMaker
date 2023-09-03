@@ -11,20 +11,21 @@ import Modal from './components/Modal';
 import Images from './components/Images';
 import Selected from './components/Selected';
 import Filter from './components/Filter';
+import { Tooltip } from 'react-tooltip';
 
 import './global.css';
 
 const App = () => {
-  const [patch] = useState('10.21.1');
+  const [patch] = useState('13.17.1');
   const [select, setSelect] = useState('');
   const [currentChampion, setCurrentChampion] = useState('');
 
-  const [buttonChampion, setButtonChampion] = useState('Select a champion')
-  const [buttonPassive, setButtonPassive] = useState('Select passive')
-  const [buttonQ, setButtonQ] = useState('Select ability')
-  const [buttonW, setButtonW] = useState('Select ability')
-  const [buttonE, setButtonE] = useState('Select ability')
-  const [buttonR, setButtonR] = useState('Select ultimate')
+  const [buttonChampion] = useState('Select a champion')
+  const [buttonPassive] = useState('Select passive')
+  const [buttonQ] = useState('Select ability')
+  const [buttonW] = useState('Select ability')
+  const [buttonE] = useState('Select ability')
+  const [buttonR] = useState('Select ultimate')
 
   const [champions, setChampions] = useState([]);
   const [championsFiltered, setChampionsFiltered] = useState([]);
@@ -36,6 +37,7 @@ const App = () => {
   useEffect(()=>{
     axios.get(`http://ddragon.leagueoflegends.com/cdn/${patch}/data/en_US/champion.json`)
       .then(res => {
+        setChampionsFiltered(Object.values(res.data.data))
         setChampions(Object.values(res.data.data))
       })
   }, [])
@@ -52,7 +54,6 @@ const App = () => {
         showSelected.innerHTML = '';
         axios.get(`http://ddragon.leagueoflegends.com/cdn/${patch}/data/en_US/champion/${champion}.json`)
         .then(res => {
-          console.log(res.data.data[champion].passive.image.full)
           buttonSelected.style.background = `url(http://ddragon.leagueoflegends.com/cdn/${patch}/img/passive/${res.data.data[champion].passive.image.full}) center center / cover`;
           showSelected.style.background = `url(${img}) center center / cover`;
         })
@@ -60,7 +61,6 @@ const App = () => {
         showSelected.innerHTML = '';
         axios.get(`http://ddragon.leagueoflegends.com/cdn/${patch}/data/en_US/champion/${champion}.json`)
         .then(res => {
-          console.log(res.data.data[champion].spells[3].image.full)
           buttonSelected.style.background = `url(http://ddragon.leagueoflegends.com/cdn/${patch}/img/spell/${res.data.data[champion].spells[3].image.full}) center center / cover`;
           showSelected.style.background = `url(${img}) center center / cover`;
         })
@@ -102,7 +102,6 @@ const App = () => {
   const handlePrint = useCallback(() => {
     const div = document.querySelector('#lolmaker');
     html2canvas(div, {useCORS: true, ignoreElements: function (el) {
-      console.log('elemntoo', el)
       if( el.id == 'button-generate') {
         return true;
     }
@@ -223,26 +222,40 @@ const App = () => {
                 }
               )
             )
-            console.log(champions)
           }} />
         </div>
         {championsFiltered.map((champion) => 
-        champion.image.full ? 
-        <Images src={`http://ddragon.leagueoflegends.com/cdn/${patch}/img/champion/${champion.image.full}`} onClick={(e) => {
-          clickChampion(e.target.currentSrc, champion.id)
-        }}/>
+        champion.image.full ?
+            (
+                <>
+                    <Images src={`http://ddragon.leagueoflegends.com/cdn/${patch}/img/champion/${champion.image.full}`} onClick={(e) => {
+                        clickChampion(e.target.currentSrc, champion.id)
+                    }}
+                    data-tooltip-id="champion"
+                    data-tooltip-html={champion.name ? champion.name : ''}
+                    data-tooltip-place="top"
+                    />
+                </>
+            )
         : null
       )}
+      <Tooltip id="champion" />
       </Modal>
       <Modal center variant="sm" btnCloser={true} id="modal-abilities" isVisible={isVisibleAbilities} onClose={() => setIsVisibleAbilities(!isVisibleAbilities)}>
         {!abilities? 'Loading...' :Object.entries(abilities).map((ability, key) => {
           return(
-            <Images src={`http://ddragon.leagueoflegends.com/cdn/${patch}/img/spell/${ability[1].image ? ability[1].image.full : ''}`} onClick={(e) => {
-              clickAbility(e.target.currentSrc, key)
-            }}/>
+            <>
+                <Images src={`http://ddragon.leagueoflegends.com/cdn/${patch}/img/spell/${ability[1].image ? ability[1].image.full : ''}`} onClick={(e) => {
+                  clickAbility(e.target.currentSrc, key)
+                }}
+                        data-tooltip-id="speel-description"
+                        data-tooltip-html={ability[1].description ? ability[1].description : ''}
+                        data-tooltip-place="top"
+                />
+            </>
           )
-        }
-         )}
+        })}
+        <Tooltip id="speel-description" />
       </Modal>
     </Contaier>
   );

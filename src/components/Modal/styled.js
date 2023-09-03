@@ -35,7 +35,7 @@ export const ModalContent = styled.div`
   display: inline-table;
 
   ${(props) => variants[props.variant]}
-  height: auto;
+  height: fit-content;
 
   margin: 20px 0 20px 0;
   ${(props) => (props.type === 'changePass' ? 'padding: 0;' : 'padding: 15px 50px;')}
